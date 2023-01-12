@@ -1,0 +1,56 @@
+name: 5 - Workflow CD Application dans AKS - Advanced
+
+on:
+  workflow_dispatch:
+
+env: # variables
+  RG_NAME: "RG-AKSCluster-JDE"
+  CLUSTER_NAME: "AKS-000-JDE" 
+  REGISTRY_NAME: "acrjsduchene2023"
+  APP_NAME: "coolapi"
+  IMAGE_VERSION: "1.0.0"
+
+jobs:
+
+  Deploy-App-Aks:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # recommandations "static code analytic" + bonnes pratiques
+      # https://github.com/zegl/kube-score/blob/master/README_CHECKS.md
+      - name: Test Kube-score
+        run: |
+          docker run -v $(pwd):/project zegl/kube-score:latest score ./Kubernetes/Manifests/coolapi/*.yml \
+            --ignore-test pod-networkpolicy \
+            --ignore-test container-image-pull-policy \
+            --ignore-test container-security-context-user-group-id \
+            --ignore-test container-security-context-readonlyrootfilesystem \
+            --ignore-test container-ephemeral-storage-request-equals-limit \
+            --ignore-test container-ephemeral-storage-request-and-limit
+
+#            --ignore-test container-resources \
+#            --ignore-test pod-probes \
+
+      - name: Create issue
+        if: ${{ failure() }} # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+        uses: imjohnbo/issue-bot@3daae12aa54d38685d7ff8459fc8a2aee8cea98b
+        with:
+          assignees: "jsduchene"
+          labels: "Kube-score"
+          title: "Erreur Kube-Score"
+          body: |
+            ### Kube-Score checks
+              - [ ] Info
+              - [ ] Erreurs
+              - [ ] Erreurs critiques
+          pinned: false
+          close-previous: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
