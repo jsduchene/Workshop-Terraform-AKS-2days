@@ -23,15 +23,15 @@ jobs:
 
       # recommandations "static code analytic" + bonnes pratiques
       # https://github.com/zegl/kube-score/blob/master/README_CHECKS.md
-      - name: Test Kube-score
+      - name: Test Pluto
         run: |
-          docker run -v $(pwd):/project zegl/kube-score:latest score ./Kubernetes/Manifests/coolapi/*.yml \
-            --ignore-test pod-networkpolicy \
-            --ignore-test container-image-pull-policy \
-            --ignore-test container-security-context-user-group-id \
-            --ignore-test container-security-context-readonlyrootfilesystem \
-            --ignore-test container-ephemeral-storage-request-equals-limit \
-            --ignore-test container-ephemeral-storage-request-and-limit
+          docker run -v $(pwd):/project rancher-stable/rancher:latest score ./Kubernetes/Manifests/coolapi/*.yml \
+#            --ignore-test pod-networkpolicy \
+#            --ignore-test container-image-pull-policy \
+#            --ignore-test container-security-context-user-group-id \
+#            --ignore-test container-security-context-readonlyrootfilesystem \
+#            --ignore-test container-ephemeral-storage-request-equals-limit \
+#            --ignore-test container-ephemeral-storage-request-and-limit
 
 #            --ignore-test container-resources \
 #            --ignore-test pod-probes \
